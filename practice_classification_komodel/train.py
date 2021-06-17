@@ -2,11 +2,13 @@ import numpy as np
 import pandas as pd
 import transformers, torch, os
 
-from practice_classification_komodel.dataloader import CustomDataset
+#from practice_classification_komodel.dataloader import CustomDataset
+from dataloader import CustomDataset
 
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from transformers import DistilBertModel
-from practice_classification_komodel.tokenization_kobert import KoBertTokenizer
+#from practice_classification_komodel.tokenization_kobert import KoBertTokenizer
+from tokenization_kobert import KoBertTokenizer
 import torch.nn as nn
 
 TRAINSET_PATH = "../nsmc-master/ratings_train.txt"
@@ -15,7 +17,7 @@ TESTSET_PATH = "../nsmc-master/ratings_test.txt"
 MAX_LEN = 200
 TRAIN_BATCH_SIZE = 8
 VALID_BATCH_SIZE = 4
-EPOCHS = 1
+EPOCHS = 10
 LEARNING_RATE = 1e-05
 
 if torch.cuda.is_available():
@@ -81,13 +83,13 @@ if __name__ == "__main__":
             loss = criterion(outputs, targets)
             if i % 5000 == 0:
                 print(f'Epoch: {epoch}, Loss:  {loss.item()}')
-                torch.save(model.state_dict(), "trained_classifier_{}".format(i))
+                torch.save(model.state_dict(), "trained_classifier_{}_{}_{:.4f}.pth".format(epoch, i, loss.item()))
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
-    if "trained_classifier_15000" in os.listdir("./"):
-        model.load_state_dict(torch.load("trained_classifier_15000"))
+    if "trained_classifier_8_15000_0.0299.pth" in os.listdir("./"):
+        model.load_state_dict(torch.load("trained_classifier_8_15000_0.0299.pth"))
     else:
         for epoch in range(EPOCHS):
             train(epoch)

@@ -18,6 +18,7 @@
 import logging
 import os
 import unicodedata
+import sentencepiece as spm
 from shutil import copyfile
 
 from transformers import PreTrainedTokenizer

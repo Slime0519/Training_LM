@@ -1,4 +1,6 @@
-from practice_classification_komodel.tokenization_kobert import KoBertTokenizer
+#from practice_classification_komodel.tokenization_kobert import KoBertTokenizer
+from tokenization_kobert import KoBertTokenizer
+
 from torch.utils.data import Dataset, DataLoader
 import torch
 
