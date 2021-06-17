@@ -17,7 +17,7 @@ TESTSET_PATH = "../nsmc-master/ratings_test.txt"
 MAX_LEN = 200
 TRAIN_BATCH_SIZE = 8
 VALID_BATCH_SIZE = 4
-EPOCHS = 10
+EPOCHS = 5
 LEARNING_RATE = 1e-05
 
 if torch.cuda.is_available():
@@ -30,15 +30,13 @@ class DistillBERTClass(nn.Module):
         super(DistillBERTClass, self).__init__()
         self.l1 = DistilBertModel.from_pretrained('monologg/distilkobert')
         self.l2 = nn.Dropout(0.3)
-        self.l3 = nn.Linear(768, 1)
-        self.sigmoid = nn.Sigmoid()
+        self.l3 = nn.Linear(768, 2)
 
     def forward(self, ids, mask, token_type_ids):
         output = self.l1(ids, attention_mask = mask)
         output = output[0][:,0]
         output2 = self.l2(output)
         output =self.l3(output2)
-        output = self.sigmoid(output)
         return output
 
 
@@ -64,8 +62,8 @@ if __name__ == "__main__":
 
     model = DistillBERTClass().to(device)
 
-    criterion = nn.BCELoss()
-    optimizer = torch.optim.Adam(params=model.parameters(), lr = LEARNING_RATE)
+    criterion = nn.BCEWithLogitsLoss()
+    optimizer = torch.optim.AdamW(params=model.parameters(), lr = LEARNING_RATE, eps=1e-06)
 
 
     def train(epoch):
@@ -79,7 +77,7 @@ if __name__ == "__main__":
             outputs = model(ids, mask, token_type_ids)
 
             optimizer.zero_grad()
-            outputs = torch.squeeze(outputs)
+            #outputs = torch.squeeze(outputs)
             loss = criterion(outputs, targets)
             if i % 5000 == 0:
                 print(f'Epoch: {epoch}, Loss:  {loss.item()}')

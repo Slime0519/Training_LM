@@ -35,7 +35,8 @@ class CustomDataset(Dataset):
             max_length=self.max_len, padding='max_length',
             return_token_type_ids=True
         )
-
+        target = [0,0]
+        target[self.targets[index]] = 1
         ids = inputs['input_ids']
         mask = inputs['attention_mask']
         token_type_ids = inputs["token_type_ids"]
@@ -44,7 +45,7 @@ class CustomDataset(Dataset):
             'ids' : torch.tensor(ids, dtype=torch.long),
             'mask' : torch.tensor(mask, dtype=torch.long),
             'token_type_ids' : torch.tensor(token_type_ids, dtype=torch.long),
-            'targets' : torch.tensor(self.targets[index], dtype=torch.float)
+            'targets' : torch.tensor(target, dtype=torch.float)
         }
 
     def __len__(self):
