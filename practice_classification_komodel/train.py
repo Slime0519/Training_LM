@@ -2,13 +2,13 @@ import numpy as np
 import pandas as pd
 import transformers, torch, os
 
-#from practice_classification_komodel.dataloader import CustomDataset
-from dataloader import CustomDataset
+from practice_classification_komodel.dataloader import CustomDataset
+#from dataloader import CustomDataset
 
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from transformers import DistilBertModel
-#from practice_classification_komodel.tokenization_kobert import KoBertTokenizer
-from tokenization_kobert import KoBertTokenizer
+from practice_classification_komodel.tokenization_kobert import KoBertTokenizer
+#from tokenization_kobert import KoBertTokenizer
 import torch.nn as nn
 
 TRAINSET_PATH = "../nsmc-master/ratings_train.txt"
@@ -86,8 +86,8 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
 
-    if "trained_classifier_8_15000_0.0299.pth" in os.listdir("./"):
-        model.load_state_dict(torch.load("trained_classifier_8_15000_0.0299.pth"))
+    if "trained_classifier_0_15000_0.0546.pth" in os.listdir("./"):
+        model.load_state_dict(torch.load("trained_classifier_0_15000_0.0546.pth"))
     else:
         for epoch in range(EPOCHS):
             train(epoch)
@@ -109,7 +109,7 @@ if __name__ == "__main__":
         return fin_outputs, fin_targets
 
     from sklearn import metrics
-    for epoch in range(EPOCHS):
+    for epoch in range(1):
         outputs, targets = validation(epoch)
         outputs = np.array(outputs) >= 0.5
         accuracy = metrics.accuracy_score(targets, outputs)
