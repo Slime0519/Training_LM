@@ -6,11 +6,9 @@ import numpy as np
 from tqdm import tqdm
 
 from torch.utils.data import DataLoader
-from KoGPT.wellness_data import WellnessDialogDataset
-from KoGPT.model import GPTmodel
+from KoGPT.KoWellness.wellness_data import WellnessDialogDataset
+from KoGPT.KoDialogGPT2 import KoDialogGPT2
 from transformers import PreTrainedTokenizerFast
-
-from torchnlp.samplers import BucketBatchSampler
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device('cpu')
 device = torch.device('cpu')
@@ -20,8 +18,9 @@ parser.add_argument("--batch_size", default=2, type=int)
 parser.add_argument("--save_step", default=100, type=int)
 parser.add_argument("--lr", default=5e-5)
 
-data_path = "chatbotData .csv"
-save_ckpt_path = "./kogpt2-wellnesee-auto-regressive.pth"
+data_path = "ChatbotData .csv"
+save_ckpt_path = "kogpt2-wellnesee-auto-regressive.pth"
+
 if __name__ =="__main__":
     args = parser.parse_args()
     n_epoch = args.epoch
@@ -38,7 +37,7 @@ if __name__ =="__main__":
     dataset = WellnessDialogDataset(tokenizer=tokenizer, filepath= data_path)
     train_loader = DataLoader(dataset, batch_size= batch_size, shuffle=True)
 
-    model = GPTmodel()
+    model = KoDialogGPT2()
     model.to(device)
 
     loss_fct = torch.nn.CrossEntropyLoss(ignore_index=3)

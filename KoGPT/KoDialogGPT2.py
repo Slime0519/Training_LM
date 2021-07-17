@@ -1,13 +1,14 @@
 import torch.nn as nn
 from transformers import GPT2LMHeadModel
 
-class GPTmodel(nn.Module):
+class KoDialogGPT2(nn.Module):
     def __init__(self):
-        super(GPTmodel, self).__init__()
+        super(KoDialogGPT2, self).__init__()
         self.kogpt2 = GPT2LMHeadModel.from_pretrained('skt/kogpt2-base-v2')
 
     def forward(self, input, labels = None):
         if labels is not None:
+            #label : https://huggingface.co/transformers/model_doc/gpt2.html#gpt2lmheadmodel
             outputs =self.kogpt2(input, labels = labels)
         else:
             outputs = self.kogpt2(input)

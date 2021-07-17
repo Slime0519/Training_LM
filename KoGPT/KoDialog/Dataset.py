@@ -1,6 +1,4 @@
-import torch
-import json
-from data_preprocessing.utils import *
+from KoGPT.data_preprocessing.utils import *
 from transformers import PreTrainedTokenizerFast
 
 from torch.utils.data import Dataset
@@ -12,17 +10,13 @@ tokenizer = PreTrainedTokenizerFast.from_pretrained('skt/kogpt2-base-v2',
 DEFAULT_PADDING_INDEX = tokenizer.pad_token_id
 
 class KoDialogueDataset(Dataset):
-    def __init__(self, datapath = "korean_dialog_summary/Training/label_kodialog_summary_train/personal_relationship.json"):
+    def __init__(self,  tokenizer : PreTrainedTokenizerFast , datapath):
         super(KoDialogueDataset, self).__init__()
         with open(datapath, "r", encoding='utf-8') as jsonfile:
             json_temp = json.load(jsonfile)
         dialogues = get_dialog(json_temp, num_participants=2, merge=True)
 
-        self.tokenizer = PreTrainedTokenizerFast.from_pretrained('skt/kogpt2-base-v2',
-                                                            bos_token='</s>',
-                                                            eos_token='</s>',
-                                                            unk_token='<unk>',
-                                                            pad_token='<pad>', mask_token='<mask>')
+        self.tokenizer = tokenizer
         bos_token_id = [self.tokenizer.bos_token_id]
         eos_token_id = [self.tokenizer.eos_token_id]
         pad_token_id = [self.tokenizer.pad_token_id]
@@ -42,12 +36,6 @@ class KoDialogueDataset(Dataset):
     def __len__(self):
         return len(self.dialogdata)
 
-
-def collate_fn(batch, train=True):
-    """ list of tensors to a batch tensors """
-    premise_batch = stack_and_pad_tensors([row for row in batch], padding_index=DEFAULT_PADDING_INDEX)
-
-    return premise_batch
 
 if __name__ == "__main__":
     dataset = KoDialogueDataset()

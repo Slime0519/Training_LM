@@ -1,17 +1,15 @@
-import os
-import numpy as np
 import torch
 
 from torch.utils.data import DataLoader
-from KoGPT.model import GPTmodel
+from KoGPT.KoDialogGPT2 import KoDialogGPT2
 from transformers import PreTrainedTokenizerFast
-from KoGPT.wellness_data import WellnessDialogDataset
+from KoGPT.KoWellness.wellness_data import WellnessDialogDataset
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 device = torch.device("cpu")
 datapath = "kogpt2-wellnesee-auto-regressive1.pth"
 
-data_path = "chatbotData .csv"
+data_path = "KoWellness/ChatbotData .csv"
 
 def get_len(str):
     for i, index in enumerate(str[0]):
@@ -26,7 +24,7 @@ if __name__ == "__main__":
                                                         pad_token='<pad>', mask_token='<mask>')
 
     checkpoint = torch.load(datapath, map_location=device)
-    model = GPTmodel().to(device)
+    model = KoDialogGPT2().to(device)
     model.load_state_dict(checkpoint['model_state_dict'])
     dataset = WellnessDialogDataset(tokenizer=tokenizer, filepath=data_path)
     train_loader = DataLoader(dataset, batch_size=1, shuffle=True)

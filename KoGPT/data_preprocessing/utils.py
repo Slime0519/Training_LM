@@ -2,6 +2,14 @@ import json
 import numpy as np
 import re
 import torch
+from transformers import PreTrainedTokenizerFast
+tokenizer = PreTrainedTokenizerFast.from_pretrained('skt/kogpt2-base-v2',
+                                                            bos_token='</s>',
+                                                            eos_token='</s>',
+                                                            unk_token='<unk>',
+                                                            pad_token='<pad>', mask_token='<mask>')
+DEFAULT_PADDING_INDEX = tokenizer.pad_token_id
+
 
 def replace_mask(string : str):
     mask_re = re.compile('#@.{2,5}#')
@@ -121,3 +129,9 @@ def stack_and_pad_tensors(batch, padding_index, dim=0):
         lengths = lengths.unsqueeze(0)
 
     return torch.Tensor(padded)
+
+def collate_fn(batch, train=True):
+    """ list of tensors to a batch tensors """
+    premise_batch = stack_and_pad_tensors([row for row in batch], padding_index=DEFAULT_PADDING_INDEX)
+
+    return premise_batch

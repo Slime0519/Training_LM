@@ -2,7 +2,7 @@ import os
 import numpy as np
 import torch
 
-from KoGPT.model import GPTmodel
+from KoGPT.KoDialogGPT2 import KoDialogGPT2
 from transformers import PreTrainedTokenizerFast
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
@@ -17,7 +17,7 @@ if __name__ == "__main__":
                                                         pad_token='<pad>', mask_token='<mask>')
 
     checkpoint = torch.load(datapath, map_location=device)
-    model = GPTmodel()
+    model = KoDialogGPT2()
     model.load_state_dict(checkpoint['model_state_dict'])
 
     model.eval()

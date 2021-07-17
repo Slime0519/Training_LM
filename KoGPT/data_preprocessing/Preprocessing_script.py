@@ -1,9 +1,8 @@
-import json
-from data_preprocessing.utils import *
+from KoGPT.data_preprocessing.utils import *
 from transformers import PreTrainedTokenizerFast
 
 if __name__ ==  "__main__":
-    with open("korean_dialog_summary/Training/label_kodialog_summary_train/personal_relationship.json", "r", encoding='utf-8') as jsonfile:
+    with open("../KoDialog/korean_dialog_summary/Training/label_kodialog_summary_train/personal_relationship.json", "r", encoding='utf-8') as jsonfile:
         json_temp = json.load(jsonfile)
 
     utterances = get_dialog(json_temp, num_participants=2, merge=True)
