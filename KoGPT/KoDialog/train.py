@@ -1,5 +1,5 @@
 import torch
-import argparse
+import argparse, os
 
 import numpy as np
 
@@ -20,6 +20,7 @@ parser.add_argument("--epoch", default=5, type=int)
 parser.add_argument("--batch_size", default=2, type=int)
 parser.add_argument("--save_step", default=100, type=int)
 parser.add_argument("--lr", default=5e-5)
+parser.add_argument("--save_path", type=str)
 
 data_path = "korean_dialog_summary/Training/label_kodialog_summary_train/personal_relationship.json"
 save_ckpt_path = "KoDialog_general.pth"
@@ -30,7 +31,7 @@ if __name__ =="__main__":
     batch_size = args.batch_size
     save_step = args.save_step
     learning_rate = args.lr
-
+    save_path = args.save_path
     tokenizer = PreTrainedTokenizerFast.from_pretrained('skt/kogpt2-base-v2',
                                                         bos_token='</s>',
                                                         eos_token='</s>',
@@ -71,6 +72,7 @@ if __name__ =="__main__":
                 losses.append(loss.item())
 
                 if (count > 0 and count % save_step == 0) or (len(data) < batch_size):
+                    save_ckpt_path = os.path.join(save_path, f"KoDialog_general_{epoch}_{count}_{np.mean(losses):.3f}.pth")
                     torch.save({
                         'epoch': epoch,
                         'train_no': count,
