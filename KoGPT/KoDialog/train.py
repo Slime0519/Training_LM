@@ -37,7 +37,7 @@ if __name__ =="__main__":
                                                         unk_token='<unk>',
                                                         pad_token='<pad>', mask_token='<mask>')
 
-    dataset = KoDialogueDataset(tokenizer=tokenizer, filepath= data_path)
+    dataset = KoDialogueDataset(tokenizer=tokenizer, datapath= data_path)
     train_sampler = SequentialSampler(dataset)
     train_batch_sampler = BucketBatchSampler(train_sampler, batch_size, True, sort_key=lambda r: len(dataset[r]))
     train_loader = DataLoader(dataset, batch_sampler=train_batch_sampler, collate_fn=collate_fn)
@@ -56,6 +56,7 @@ if __name__ =="__main__":
             for i, data in enumerate(train_loader):
                 optimizer.zero_grad()
                 data = data.to(device)
+
 
                 outputs = model(data, labels = data)
                 _, logits = outputs[:2]

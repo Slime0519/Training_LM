@@ -147,7 +147,7 @@ def stack_and_pad_tensors(batch, padding_index, dim=0):
     for _ in range(dim):
         lengths = lengths.unsqueeze(0)
 
-    return torch.Tensor(padded)
+    return torch.LongTensor(padded)
 
 def collate_fn(batch, train=True):
     """ list of tensors to a batch tensors """

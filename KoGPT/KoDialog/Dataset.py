@@ -32,7 +32,8 @@ class KoDialogueDataset(Dataset):
             self.dialogdata.append(index_of_words)
 
     def __getitem__(self, index):
-        return  torch.Tensor(self.dialogdata[index])
+        #return  torch.Tensor(self.dialogdata[index], dtype=torch.long)
+        return torch.LongTensor(self.dialogdata[index])
 
     def __len__(self):
         return len(self.dialogdata)
