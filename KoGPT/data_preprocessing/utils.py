@@ -62,6 +62,7 @@ def get_dialog(jsondata, num_participants = None, merge = True, mode ="attach"):
         if(num_participants):
             if(jsondata['data'][i]['header']["dialogueInfo"]["numberOfParticipants"] > num_participants):
                 continue
+
         utterance = []
 
         for order, utterance_obj in enumerate(jsondata['data'][i]['body']['dialogue']):

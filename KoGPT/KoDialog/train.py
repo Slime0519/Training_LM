@@ -22,7 +22,8 @@ parser.add_argument("--save_step", default=100, type=int)
 parser.add_argument("--lr", default=5e-5)
 parser.add_argument("--save_path", type=str)
 
-data_path = "korean_dialog_summary/Training/label_kodialog_summary_train/personal_relationship.json"
+train_data_path = "korean_dialog_summary/Training/label_kodialog_summary_train/personal_relationship.json"
+valid_data_path = "korean_dialog_summary/Validation/label_kodialog_summary_valid/personal_relationship.json"
 save_ckpt_path = "KoDialog_general.pth"
 
 if __name__ =="__main__":
@@ -38,10 +39,13 @@ if __name__ =="__main__":
                                                         unk_token='<unk>',
                                                         pad_token='<pad>', mask_token='<mask>')
 
-    dataset = KoDialogueDataset(tokenizer=tokenizer, datapath= data_path)
-    train_sampler = SequentialSampler(dataset)
-    train_batch_sampler = BucketBatchSampler(train_sampler, batch_size, True, sort_key=lambda r: len(dataset[r]))
-    train_loader = DataLoader(dataset, batch_sampler=train_batch_sampler, collate_fn=collate_fn)
+    train_dataset = KoDialogueDataset(tokenizer=tokenizer, datapath= train_data_path)
+    train_sampler = SequentialSampler(train_dataset)
+    train_batch_sampler = BucketBatchSampler(train_sampler, batch_size, True, sort_key=lambda r: len(train_dataset[r]))
+    train_loader = DataLoader(train_dataset, batch_sampler=train_batch_sampler, collate_fn=collate_fn)
+
+    valid_dataset = KoDialogueDataset(tokenizer=tokenizer, datapath=valid_data_path)
+    valid_loader = DataLoader(valid_dataset, batch_size=1)
 
     model = KoDialogGPT2()
     model.to(device)
@@ -49,11 +53,13 @@ if __name__ =="__main__":
     loss_fct = torch.nn.CrossEntropyLoss(ignore_index=3)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-    losses = []
 
     for epoch in range(n_epoch):
         count = 0
+        losses = []
+        valid_losses = []
         with tqdm(total=len(train_loader), desc=f"Train({epoch})") as pbar:
+            model.train()
             for i, data in enumerate(train_loader):
                 optimizer.zero_grad()
                 data = data.to(device)
@@ -83,3 +89,17 @@ if __name__ =="__main__":
                 count += 1
                 pbar.update(1)
                 pbar.set_postfix_str(f"Loss: {loss.item():.3f} ({np.mean(losses):.3f})")
+
+            model.eval()
+            for i, data in enumerate(valid_loader):
+                data = data.to(device)
+                outputs = model(data, labels = data)
+                _, logits = outputs[:2]
+
+                shift_logits = logits[..., :-1, :].contiguous()
+                shift_labels = data[..., 1:].contiguous()
+
+                valid_loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+                valid_losses.append(valid_loss.item())
+            print(f"Validation loss : {np.mean(valid_losses):.3f}")
+

@@ -1,28 +1,37 @@
 from KoGPT.data_preprocessing.utils import *
 from transformers import PreTrainedTokenizerFast
+from KoGPT.KoDialog.twitter.read_twitter import *
 
 from torch.utils.data import Dataset
+
 tokenizer = PreTrainedTokenizerFast.from_pretrained('skt/kogpt2-base-v2',
                                                             bos_token='</s>',
                                                             eos_token='</s>',
                                                             unk_token='<unk>',
                                                             pad_token='<pad>', mask_token='<mask>')
 DEFAULT_PADDING_INDEX = tokenizer.pad_token_id
-data_path = "korean_dialog_summary/Training/label_kodialog_summary_train/personal_relationship.json"
+#data_path = "korean_dialog_summary/Training/label_kodialog_summary_train/personal_relationship.json"
+data_path = "twitter/twitter_dialogue_scenario.xlsx"
 
 class KoDialogueDataset(Dataset):
     def __init__(self,  tokenizer : PreTrainedTokenizerFast , datapath):
         super(KoDialogueDataset, self).__init__()
-        with open(datapath, "r", encoding='utf-8') as jsonfile:
-            json_temp = json.load(jsonfile)
-        dialogues = get_dialog(json_temp, num_participants=2, merge=True)
+        if datapath[-4:] == "json":
+            with open(datapath, "r", encoding='utf-8') as jsonfile:
+                json_temp = json.load(jsonfile)
+            dialogues = get_dialog(json_temp, num_participants=2, merge=True)
+            clips = get_twoturn_dialogues(dialogues)
+        elif datapath[-4:] == "xlsx":
+            exceldata = read_xlsx(datapath)
+            dialogues = excel_to_list(exceldata)
+            clips = make_clips(dialogues)
 
         self.tokenizer = tokenizer
         bos_token_id = [self.tokenizer.bos_token_id]
         eos_token_id = [self.tokenizer.eos_token_id]
         pad_token_id = [self.tokenizer.pad_token_id]
 
-        clips = get_twoturn_dialogues(dialogues)
+
         self.dialogdata = []
 
         for clip in clips:
@@ -59,5 +68,16 @@ if __name__ == "__main__":
         print([tokenizer.decode(np.array(element).astype(dtype=int)) for element in batch])
         if(batch_idx > 1):
             break
+    """
+    valid_data_path = "korean_dialog_summary/Validation/label_kodialog_summary_valid/personal_relationship.json"
+    valid_dataset = KoDialogueDataset(tokenizer=tokenizer, datapath=valid_data_path)
+    valid_loader = DataLoader(valid_dataset, batch_size=1)
 
-
+    print("valid data length : {}".format(valid_dataset.__len__()))
+    for batch_idx, batch in enumerate(valid_loader):
+        print([np.array(element).astype(int) for element in batch])
+        print([tokenizer.decode(np.array(element).astype(dtype=int)) for element in batch])
+        if (batch_idx > 1):
+            break
+            
+    """

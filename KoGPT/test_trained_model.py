@@ -7,7 +7,7 @@ from transformers import PreTrainedTokenizerFast
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-datapath = "kogpt2-wellnesee-auto-regressive1.pth"
+datapath = "KoDialog/KoDialog_GPT2/KoDialog_general_9_3000_2.032.pth"
 
 if __name__ == "__main__":
     tokenizer = PreTrainedTokenizerFast.from_pretrained('skt/kogpt2-base-v2',
@@ -30,7 +30,16 @@ if __name__ == "__main__":
         tokenized_indicies = tokenizer.encode(sent)
         input_ids = torch.tensor([tokenizer.bos_token_id] + tokenized_indicies + [tokenizer.eos_token_id] + [tokenizer.bos_token_id]).unsqueeze(0)
 
-        sample_output = model.generate(input_ids=input_ids)
+        #sample_output = model.generate(input_ids=input_ids)
+        sample_output = model.generate(input_ids,
+                     do_sample=True,
+                     max_length=50,
+                     top_p=0.92,
+                     top_k=200,
+                     temperature=0.9,
+                     no_repeat_ngram_size=None,
+                     num_return_sequences=None,
+                     early_stopping=True)
         print(input_ids)
         print(tokenizer.decode(input_ids[0]))
         print(sample_output)
