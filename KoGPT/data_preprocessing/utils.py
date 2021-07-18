@@ -65,6 +65,7 @@ def get_dialog(jsondata, num_participants = None, merge = True, mode ="attach"):
         utterance = []
 
         for order, utterance_obj in enumerate(jsondata['data'][i]['body']['dialogue']):
+
             if(merge and order is not 0 and utterance_obj["participantID"] == \
                     pre_utterance_obj["participantID"] and utterance_obj["turnID"] == pre_utterance_obj["turnID"]):
                 utterance[-1] = merge_utterance(pre_utterance_obj['utterance'], utterance_obj['utterance'], mode = mode)
@@ -82,18 +83,34 @@ def get_dialog(jsondata, num_participants = None, merge = True, mode ="attach"):
 def get_stat(utterances):
     total_dialog_num = 0
     total_uttr_len = 0
+    len_utterance = []
+
     for element in utterances:
         total_dialog_num += len(element)
         for string in element:
             if string == -1:
                 continue
-            total_uttr_len += len(string)
+            #total_uttr_len += len(string)
+            len_utterance.append(len(string))
     #print("average len of dialogues : {}".format(total_dialog_num/len(utterances)))
     #print("average len of utterance in each dialogue : {}".format(total_uttr_len/total_dialog_num))
-    return total_dialog_num/len(utterances), total_uttr_len/total_dialog_num
+
+    len_utterance = np.array(len_utterance)
+    first_quantile = np.percentile(len_utterance, 25)
+    third_quantile = np.percentile(len_utterance, 75)
+    avg = np.average(len_utterance)
+    median = np.median(len_utterance)
+    print("first quantile : {}, third quantile : {}".format(first_quantile, third_quantile))
+    print("average : {} , median : {}".format(avg, median))
+
+    return avg, median, first_quantile, third_quantile
+
+    #return total_dialog_num/len(utterances), total_uttr_len/total_dialog_num
 
 def get_twoturn_dialogues(dialogues):
     clips = []
+    _, _, first_quantile, third_quantile = get_stat(dialogues)
+
     for dialogue in dialogues:
         index = 0
         while(index<len(dialogue)-1):
@@ -106,7 +123,9 @@ def get_twoturn_dialogues(dialogues):
 
             if -1 in clip:
                 continue
-
+            if len(clip[0]) < first_quantile or len(clip[1]) < first_quantile \
+                or len(clip[0]) >third_quantile or len(clip[1]) > third_quantile:
+                continue
             clips.append(clip)
     return clips
 

@@ -8,6 +8,7 @@ tokenizer = PreTrainedTokenizerFast.from_pretrained('skt/kogpt2-base-v2',
                                                             unk_token='<unk>',
                                                             pad_token='<pad>', mask_token='<mask>')
 DEFAULT_PADDING_INDEX = tokenizer.pad_token_id
+data_path = "korean_dialog_summary/Training/label_kodialog_summary_train/personal_relationship.json"
 
 class KoDialogueDataset(Dataset):
     def __init__(self,  tokenizer : PreTrainedTokenizerFast , datapath):
@@ -38,7 +39,7 @@ class KoDialogueDataset(Dataset):
 
 
 if __name__ == "__main__":
-    dataset = KoDialogueDataset()
+    dataset = KoDialogueDataset(datapath=data_path, tokenizer=tokenizer)
     from torch.utils.data import SequentialSampler, DataLoader
     from torchnlp.samplers import BucketBatchSampler
 
@@ -47,11 +48,15 @@ if __name__ == "__main__":
     train_batch_sampler = BucketBatchSampler(train_sampler, batch_size, True, sort_key=lambda r: len(dataset[r]))
     train_dataloader = DataLoader(dataset, batch_sampler=train_batch_sampler,collate_fn=collate_fn)
 
+    print("dataset length : {}".format(dataset.__len__()))
+    print("padding index : {}".format(tokenizer.pad_token_id))
+
     for batch_idx, batch in enumerate(train_dataloader):
         #print(batch)
-        print("first : {}   second : {}".format(batch[0].shape, batch[1].shape))
+        #print("first : {}   second : {}".format(batch[0].shape, batch[1].shape))
+        print([np.array(element).astype(int) for element in batch])
         print([tokenizer.decode(np.array(element).astype(dtype=int)) for element in batch])
-        if(batch_idx > 3):
+        if(batch_idx > 1):
             break
 
 
